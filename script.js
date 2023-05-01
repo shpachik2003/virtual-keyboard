@@ -175,6 +175,13 @@ document.addEventListener('keyup', keyUpHandle);
 document.addEventListener('mousedown', mouseDown);
 document.addEventListener('mouseup', mouseUp);
 
+if (localStorage.getItem('lang') && localStorage.getItem('lang') !== '') {
+  Key.lang = localStorage.getItem('lang');
+  keyboardCapsChange();
+} else {
+  localStorage.setItem('lang', Key.lang);
+}
+
 
 
 function getKeysForLine(num=1) {
