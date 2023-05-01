@@ -118,6 +118,11 @@ class Key {
   isCommand() {
     return Key.commandKeys.includes(this.code);
   }
+
+  static capsToggle() {
+    if (Key.caps) Key.caps = false;
+    else Key.caps = true;
+  }
   
   constructor(keyArray) {
     [this.code, this.value, this.shiftValue, this.ruValue, this.ruShiftValue] = [...keyArray];
