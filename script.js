@@ -161,6 +161,8 @@ document.body.appendChild(mainContainer);
 
 document.addEventListener('keydown', keyDownHandle);
 document.addEventListener('keyup', keyUpHandle);
+document.addEventListener('mousedown', mouseDown);
+document.addEventListener('mouseup', mouseUp);
 
 
 
@@ -299,4 +301,35 @@ function removeActive(key) {
   const target = keysHtml.find((el) => el.dataset.code === key.code);
 
   target.classList.remove('active');
+}
+
+
+
+function mouseDown(e) {
+
+  const { code } = e.target.dataset;
+  keysActive.add(code);
+
+  if (code) {
+    const key = Key.getKeyByCode(code);
+    if (key && key.code !== 'CapsLock') {
+      addActive(key);
+    }
+    keyActionHandle(key);
+  }
+}
+
+function mouseUp(e) {
+  
+  const { code } = e.target.dataset;
+  
+  keysActive.delete(code);
+  
+  if (code) {
+    const key = Key.getKeyByCode(code);
+    if (key && key.code !== 'CapsLock') {
+      setTimeout(removeActive, 200, key);
+    }
+    textarea.focus();
+  }
 }
