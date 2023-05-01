@@ -71,6 +71,12 @@ class Key {
 
   static commandKeys = ['Backspace', 'CapsLock', 'ShiftLeft', 'ShiftRight', 'ControlLeft', 'ControlRight', 'AltLeft', 'AltRight', 'MetaLeft', 'MetaRight'];
 
+  static caps = false;
+
+  static shift = 0;
+
+  static lang = 'en';
+
   static getKeyByCode(code) {
     
     const result = Key.arrayOfKeys.find((el) => el[0] === code);
@@ -224,7 +230,7 @@ function keyActionHandle(key) {
   if (key.isCommand()) {
     switch (key.code) {
       case 'Backspace':
-        deleteChar();
+        deleteKey();
         break;
       case 'CapsLock':
         capsToggle();
@@ -234,7 +240,7 @@ function keyActionHandle(key) {
         break;
       case 'ShiftRight':
       case 'ShiftLeft':
-        shiftPress();
+        shiftKey();
         keyboardCapsChange();
         break;
       case 'ControlLeft':
@@ -332,4 +338,53 @@ function mouseUp(e) {
     }
     textarea.focus();
   }
+}
+
+function deleteKey() {
+  const cursorPosition = textarea.selectionStart;
+
+  if (cursorPosition === 0) return;
+
+  const str = textarea.value;
+  const firstTextPart = str.substring(0, cursorPosition - 1);
+  const secondTextPart = str.substring(cursorPosition);
+  const newString = firstTextPart + secondTextPart;
+  textarea.value = newString;
+  textarea.selectionStart = cursorPosition - 1;
+  textarea.selectionEnd = cursorPosition - 1;
+}
+
+function shiftKey() {
+  Key.shift += 1;
+}
+
+function capsToggle() {
+  Key.capsToggle();
+}
+
+function langToggle() {
+
+  if (Key.lang === 'en') {
+    Key.lang = 'ru';
+    localStorage.setItem('lang', Key.lang);
+  } else {
+    Key.lang = 'en';
+    localStorage.setItem('lang', Key.lang);
+  }
+
+}
+
+function shiftRelease() {
+  Key.shift -= 1;
+}
+
+function keyboardCapsChange() {
+  keysHtml.forEach((el) => {
+    const key = Key.getKeyByCode(el.dataset.code);
+
+    if (!key.isCommand() && key.code !== 'Enter' && key.code !== 'Tab') {
+      const element = el;
+      element.innerText = key.getValue();
+    }
+  });
 }
