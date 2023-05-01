@@ -2,7 +2,8 @@
   width: 950px;
   display: flex;
   flex-wrap: wrap;
-  justify-content: center;
+  justify-content: left;
+  padding-top:40px;
 }
 
 .key {
@@ -11,11 +12,14 @@
   width: auto;
   height: 50px;
   margin: 5px;
-  border: none;
-  outline: none;
-  background-color: white;
+}
+
+textarea {
+  padding-top: 30px;
+  width: 950px;
+  min-height: 200px;
 }
 
 .active {
-  background-color: #ccc;
+  background-color: lightgray;
 }
