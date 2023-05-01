@@ -160,6 +160,7 @@ mainContainer.appendChild(sys2);
 document.body.appendChild(mainContainer);
 
 document.addEventListener('keydown', keyDownHandle);
+document.addEventListener('keyup', keyUpHandle);
 
 
 
@@ -265,4 +266,37 @@ function insertKey(key) {
   textarea.value = newStr;
   textarea.selectionStart = curPos + 1;
   textarea.selectionEnd = curPos + 1;
+}
+
+function keyUpHandle(e) {
+  keysActive.delete(e.code);
+
+  const key = Key.getKeyByCode(e.code);
+
+  if (key && key.code !== 'CapsLock') {
+    setTimeout(removeActive, 110, key);
+  }
+
+  keyUpAction(key);
+}
+
+
+function keyUpAction(key) {
+  if (!key) return;
+  switch (key.code) {
+    case 'ShiftRight':
+    case 'ShiftLeft':
+      shiftRelease();
+      keyboardCapsChange();
+      break;
+    default:
+      break;
+  }
+}
+
+function removeActive(key) {
+
+  const target = keysHtml.find((el) => el.dataset.code === key.code);
+
+  target.classList.remove('active');
 }
