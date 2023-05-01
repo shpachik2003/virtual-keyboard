@@ -1,0 +1,84 @@
+.main-container {
+  margin: 0 auto;
+  width: 700px;
+  background-color: white;
+}
+
+h1 {
+  text-align: center;
+}
+
+textarea {
+  width: 99%;
+  height: 200px;
+  resize: none;
+}
+
+.keyboard-line {
+  width: 670px;
+  margin-left: auto;
+  margin-right: auto;
+  display: flex;
+  flex-flow: row nowrap;
+  gap: 5px;
+  margin-bottom: 5px;
+}
+
+.key {
+  min-width: 40px;
+  height: 40px;
+  background-color: #e905a5;
+  color: rgb(155, 220, 4);
+  text-align: center;
+  box-sizing: border-box;
+  padding: 10px 5px;
+  border-radius: 2px;
+  border-radius: 10px;
+  transition: all 0.2s;
+  cursor: pointer;
+}
+
+.key.active {
+  background-color: rgb(37, 111, 248);
+  transition: all 0.2s;
+  border-radius: 15px;
+}
+
+.keyboard-container {
+  background-color: #004bf8;
+}
+.keyboard-container .keyboard-line:nth-child(1) .key:last-child {
+  width: 80px;
+}
+.keyboard-container .keyboard-line:nth-child(2) .key:first-child {
+  width: 65px;
+}
+.keyboard-container .keyboard-line:nth-child(2) .key:last-child {
+  width: 55px;
+}
+.keyboard-container .keyboard-line:nth-child(3) .key:last-child {
+  width: 86px;
+}
+.keyboard-container .keyboard-line:nth-child(4) .key:first-child {
+  width: 100px;
+}
+.keyboard-container .keyboard-line:nth-child(4) .key:last-child {
+  width: 65px;
+}
+.keyboard-container .keyboard-line:nth-child(5) .key:nth-child(4) {
+  width: 178px;
+}
+
+.syst{
+  margin-top: 30px;
+  text-align: center;
+  font-size: 21px;
+}
+
+.lan {
+  margin-top: 30px;
+  text-align: center;
+  font-size: 21px;
+}
+
+/*# sourceMappingURL=style.css.map */
