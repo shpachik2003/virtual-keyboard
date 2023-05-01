@@ -69,12 +69,57 @@ class Key {
     ['ArrowRight', '►', '►', '►', '►']
   ];
 
+  static commandKeys = ['Backspace', 'CapsLock', 'ShiftLeft', 'ShiftRight', 'ControlLeft', 'ControlRight', 'AltLeft', 'AltRight', 'MetaLeft', 'MetaRight'];
+
+  static getKeyByCode(code) {
+    
+    const result = Key.arrayOfKeys.find((el) => el[0] === code);
+    
+    if (result) {
+      return new Key(result);
+    }
+
+    return false;
+  }
+
+  
+  getValue() {
+    let value = '';
+    if (this.value === 'Tab') return '\t';
+    if (this.value === 'Enter') return '\n';
+    if (this.value === 'Space') return ' ';
+
+    if (Key.shift) {
+      if (Key.lang === 'en') {
+        value = this.shiftValue;
+      } else {
+        value = this.ruShiftValue;
+      }
+    } else if (!Key.shift) {
+      if (Key.lang === 'en') {
+        value = this.value;
+      } else {
+        value = this.ruValue;
+      }
+    }
+
+    if ((Key.caps && !Key.shift) || (!Key.caps && Key.shift)) {
+      return value.toUpperCase();
+    }
+    return value.toLowerCase();
+  }
+
+  isCommand() {
+    return Key.commandKeys.includes(this.code);
+  }
+  
   constructor(keyArray) {
     [this.code, this.value, this.shiftValue, this.ruValue, this.ruShiftValue] = [...keyArray];
   }
 }
 
 const keysHtml = [];
+const keysActive = new Set();
 
 const mainContainer = document.createElement('div');
 mainContainer.classList.add('main-container');
@@ -98,21 +143,23 @@ for (let i = 1; i <= 5; i += 1) {
   keyBoardContainer.appendChild(keyBoardLine);
 }
 
-const d1 = document.createElement('div');
-d1.classList.add('system');
-d1.innerHTML = 'Клавиатура создана в операционной системе MacOs';
+const sys = document.createElement('div');
+sys.classList.add('syst');
+sys.innerHTML = 'Клавиатура для операционной системы MacOS';
 
-const d2 = document.createElement('div');
-d2.classList.add('lang');
-d2.innerHTML = 'Для переключения языка комбинация: левыe ctrl + alt';
+const sys2 = document.createElement('div');
+sys2.classList.add('lan');
+sys2.innerHTML = 'Комбинация переключения языка: левыe ctrl + alt';
 
 mainContainer.appendChild(h1);
 mainContainer.appendChild(textarea);
 mainContainer.appendChild(keyBoardContainer);
-mainContainer.appendChild(d1);
-mainContainer.appendChild(d2);
+mainContainer.appendChild(sys);
+mainContainer.appendChild(sys2);
 
 document.body.appendChild(mainContainer);
+
+document.addEventListener('keydown', keyDownHandle);
 
 
 
@@ -152,4 +199,70 @@ function getKeysForLine(num=1) {
 
     return rez;
     
+}
+
+
+function keyDownHandle(e) {
+  keysActive.add(e.code);
+
+  const key = Key.getKeyByCode(e.code);
+  if (key && key.code !== 'CapsLock') {
+    e.preventDefault();
+    addActive(key);
+  }
+  keyActionHandle(key);
+
+  textarea.focus();
+}
+
+function keyActionHandle(key) {
+  if (!key) return;
+
+  if (key.isCommand()) {
+    switch (key.code) {
+      case 'Backspace':
+        deleteChar();
+        break;
+      case 'CapsLock':
+        capsToggle();
+        if (Key.caps) addActive(key);
+        else removeActive(key);
+        keyboardCapsChange();
+        break;
+      case 'ShiftRight':
+      case 'ShiftLeft':
+        shiftPress();
+        keyboardCapsChange();
+        break;
+      case 'ControlLeft':
+      case 'AltLeft':
+        if (keysActive.has('ControlLeft') && keysActive.has('AltLeft')) {
+          langToggle();
+          keyboardCapsChange();
+        }
+        break;
+      default:
+        break;
+    }
+  } else {
+    insertKey(key);
+  }
+}
+
+function addActive(key) {
+  const target = keysHtml.find((el) => el.dataset.code === key.code);
+
+  target.classList.add('active');
+}
+
+function insertKey(key) {
+  if (key.isCommand()) return;
+  const curPos = textarea.selectionStart;
+  const str = textarea.value;
+  const textPart1 = str.substring(0, curPos);
+  const textPart2 = str.substring(curPos);
+  const newStr = textPart1 + key.getValue() + textPart2;
+  textarea.value = newStr;
+  textarea.selectionStart = curPos + 1;
+  textarea.selectionEnd = curPos + 1;
 }
