@@ -66,7 +66,7 @@ class Key {
     ['AltRight', 'Option', 'Option', 'Option', 'Option'],
     ['ArrowLeft', '◄', '◄', '◄', '◄'],
     ['ArrowDown', '▼', '▼', '▼', '▼'],
-    ['ArrowRight', '►', '►', '►', '►']
+    ['ArrowRight', '►', '►', '►', '►'],
   ];
 
   static commandKeys = ['Backspace', 'CapsLock', 'ShiftLeft', 'ShiftRight', 'ControlLeft', 'ControlRight', 'AltLeft', 'AltRight', 'MetaLeft', 'MetaRight'];
@@ -78,9 +78,7 @@ class Key {
   static lang = 'en';
 
   static getKeyByCode(code) {
-    
     const result = Key.arrayOfKeys.find((el) => el[0] === code);
-    
     if (result) {
       return new Key(result);
     }
@@ -88,7 +86,6 @@ class Key {
     return false;
   }
 
-  
   getValue() {
     let value = '';
     if (this.value === 'Tab') return '\t';
@@ -123,10 +120,47 @@ class Key {
     if (Key.caps) Key.caps = false;
     else Key.caps = true;
   }
-  
+
   constructor(keyArray) {
     [this.code, this.value, this.shiftValue, this.ruValue, this.ruShiftValue] = [...keyArray];
   }
+}
+
+function getKeysForLine(num = 1) {
+  const rez = [];
+  let end = 0;
+  let start = 0;
+  switch (num) {
+    case 1:
+      start = 0;
+      end = 13;
+      break;
+    case 2:
+      start = 14;
+      end = 27;
+      break;
+    case 3:
+      start = 28;
+      end = 40;
+      break;
+    case 4:
+      start = 41;
+      end = 53;
+      break;
+    case 5:
+      start = 54;
+      end = 62;
+      break;
+    default:
+      break;
+  }
+
+  for (let i = start; i <= end; i += 1) {
+    const key = new Key(Key.arrayOfKeys[i]);
+    rez.push(key);
+  }
+
+  return rez;
 }
 
 const keysHtml = [];
@@ -170,70 +204,71 @@ mainContainer.appendChild(sys2);
 
 document.body.appendChild(mainContainer);
 
-document.addEventListener('keydown', keyDownHandle);
-document.addEventListener('keyup', keyUpHandle);
-document.addEventListener('mousedown', mouseDown);
-document.addEventListener('mouseup', mouseUp);
+function deleteKey() {
+  const cursorPosition = textarea.selectionStart;
 
-if (localStorage.getItem('lang') && localStorage.getItem('lang') !== '') {
-  Key.lang = localStorage.getItem('lang');
-  keyboardCapsChange();
-} else {
-  localStorage.setItem('lang', Key.lang);
+  if (cursorPosition === 0) return;
+
+  const str = textarea.value;
+  const firstTextPart = str.substring(0, cursorPosition - 1);
+  const secondTextPart = str.substring(cursorPosition);
+  const newString = firstTextPart + secondTextPart;
+  textarea.value = newString;
+  textarea.selectionStart = cursorPosition - 1;
+  textarea.selectionEnd = cursorPosition - 1;
 }
 
-
-
-function getKeysForLine(num=1) {
-    const rez = [];
-    let end = 0;
-    let start = 0;
-    switch (num) {
-      case 1:
-        start = 0;
-        end = 13;
-        break;
-      case 2:
-        start = 14;
-        end = 27;
-        break;
-      case 3:
-        start = 28;
-        end = 40;
-        break;
-      case 4:
-        start = 41;
-        end = 53;
-        break;
-      case 5:
-        start = 54;
-        end = 62;
-        break;
-      default:
-        break;
-    }
-    console.log(num, start,end);
-    for (let i = start; i <= end; i ++) {
-      let key = new Key(Key.arrayOfKeys[i]);
-      rez.push(key);
-    }
-
-    return rez;
-    
+function capsToggle() {
+  Key.capsToggle();
 }
 
+function addActive(key) {
+  const target = keysHtml.find((el) => el.dataset.code === key.code);
 
-function keyDownHandle(e) {
-  keysActive.add(e.code);
+  target.classList.add('active');
+}
 
-  const key = Key.getKeyByCode(e.code);
-  if (key && key.code !== 'CapsLock') {
-    e.preventDefault();
-    addActive(key);
+function removeActive(key) {
+  const target = keysHtml.find((el) => el.dataset.code === key.code);
+
+  target.classList.remove('active');
+}
+
+function keyboardCapsChange() {
+  keysHtml.forEach((el) => {
+    const key = Key.getKeyByCode(el.dataset.code);
+
+    if (!key.isCommand() && key.code !== 'Enter' && key.code !== 'Tab') {
+      const element = el;
+      element.innerText = key.getValue();
+    }
+  });
+}
+
+function shiftKey() {
+  Key.shift += 1;
+}
+
+function langToggle() {
+  if (Key.lang === 'en') {
+    Key.lang = 'ru';
+    localStorage.setItem('lang', Key.lang);
+  } else {
+    Key.lang = 'en';
+    localStorage.setItem('lang', Key.lang);
   }
-  keyActionHandle(key);
+}
 
-  textarea.focus();
+function insertKey(key) {
+  if (key.isCommand()) return;
+  const curPos = textarea.selectionStart;
+  const str = textarea.value;
+  const textPart1 = str.substring(0, curPos);
+  const textPart2 = str.substring(curPos);
+  const newStr = textPart1 + key.getValue() + textPart2;
+  textarea.value = newStr;
+  textarea.selectionStart = curPos + 1;
+  textarea.selectionEnd = curPos + 1;
 }
 
 function keyActionHandle(key) {
@@ -270,36 +305,9 @@ function keyActionHandle(key) {
   }
 }
 
-function addActive(key) {
-  const target = keysHtml.find((el) => el.dataset.code === key.code);
-
-  target.classList.add('active');
+function shiftRelease() {
+  Key.shift -= 1;
 }
-
-function insertKey(key) {
-  if (key.isCommand()) return;
-  const curPos = textarea.selectionStart;
-  const str = textarea.value;
-  const textPart1 = str.substring(0, curPos);
-  const textPart2 = str.substring(curPos);
-  const newStr = textPart1 + key.getValue() + textPart2;
-  textarea.value = newStr;
-  textarea.selectionStart = curPos + 1;
-  textarea.selectionEnd = curPos + 1;
-}
-
-function keyUpHandle(e) {
-  keysActive.delete(e.code);
-
-  const key = Key.getKeyByCode(e.code);
-
-  if (key && key.code !== 'CapsLock') {
-    setTimeout(removeActive, 110, key);
-  }
-
-  keyUpAction(key);
-}
-
 
 function keyUpAction(key) {
   if (!key) return;
@@ -314,17 +322,19 @@ function keyUpAction(key) {
   }
 }
 
-function removeActive(key) {
+function keyUpHandle(e) {
+  keysActive.delete(e.code);
 
-  const target = keysHtml.find((el) => el.dataset.code === key.code);
+  const key = Key.getKeyByCode(e.code);
 
-  target.classList.remove('active');
+  if (key && key.code !== 'CapsLock') {
+    setTimeout(removeActive, 110, key);
+  }
+
+  keyUpAction(key);
 }
 
-
-
 function mouseDown(e) {
-
   const { code } = e.target.dataset;
   keysActive.add(code);
 
@@ -338,11 +348,9 @@ function mouseDown(e) {
 }
 
 function mouseUp(e) {
-  
   const { code } = e.target.dataset;
-  
   keysActive.delete(code);
-  
+
   if (code) {
     const key = Key.getKeyByCode(code);
     if (key && key.code !== 'CapsLock') {
@@ -352,51 +360,27 @@ function mouseUp(e) {
   }
 }
 
-function deleteKey() {
-  const cursorPosition = textarea.selectionStart;
+function keyDownHandle(e) {
+  keysActive.add(e.code);
 
-  if (cursorPosition === 0) return;
-
-  const str = textarea.value;
-  const firstTextPart = str.substring(0, cursorPosition - 1);
-  const secondTextPart = str.substring(cursorPosition);
-  const newString = firstTextPart + secondTextPart;
-  textarea.value = newString;
-  textarea.selectionStart = cursorPosition - 1;
-  textarea.selectionEnd = cursorPosition - 1;
-}
-
-function shiftKey() {
-  Key.shift += 1;
-}
-
-function capsToggle() {
-  Key.capsToggle();
-}
-
-function langToggle() {
-
-  if (Key.lang === 'en') {
-    Key.lang = 'ru';
-    localStorage.setItem('lang', Key.lang);
-  } else {
-    Key.lang = 'en';
-    localStorage.setItem('lang', Key.lang);
+  const key = Key.getKeyByCode(e.code);
+  if (key && key.code !== 'CapsLock') {
+    e.preventDefault();
+    addActive(key);
   }
+  keyActionHandle(key);
 
+  textarea.focus();
 }
 
-function shiftRelease() {
-  Key.shift -= 1;
-}
+document.addEventListener('keydown', keyDownHandle);
+document.addEventListener('keyup', keyUpHandle);
+document.addEventListener('mousedown', mouseDown);
+document.addEventListener('mouseup', mouseUp);
 
-function keyboardCapsChange() {
-  keysHtml.forEach((el) => {
-    const key = Key.getKeyByCode(el.dataset.code);
-
-    if (!key.isCommand() && key.code !== 'Enter' && key.code !== 'Tab') {
-      const element = el;
-      element.innerText = key.getValue();
-    }
-  });
+if (localStorage.getItem('lang') && localStorage.getItem('lang') !== '') {
+  Key.lang = localStorage.getItem('lang');
+  keyboardCapsChange();
+} else {
+  localStorage.setItem('lang', Key.lang);
 }
